@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../utils/app_icons.dart';
-import '../../profile/profile_screen.dart';
 
 class ContactSearchView extends SearchDelegate {
   ContactSearchView({
@@ -65,7 +65,9 @@ class ContactSearchView extends SearchDelegate {
                 color: Colors.black,
               ),),
               trailing: IconButton(
-                onPressed: () {},
+                onPressed: () async{
+                  await FlutterPhoneDirectCaller.callNumber(phoneNumber[index]);
+                },
                 icon: SvgPicture.asset(AppIcons.phone),
               ),
               onTap: (){

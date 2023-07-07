@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:homeworks/ui/add_contact/add_contact_screen.dart';
 import 'package:homeworks/ui/contact/widgets/search_view_screen.dart';
@@ -39,6 +40,7 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
 
   _getContactsByAlp(String order) async {
     contacts = await LocalDatabase.getContactsByAlphabet(order);
+    debugPrint('-------------$contacts------------');
     setState(() {});
   }
 
@@ -49,7 +51,6 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
   bool isSearch=false;
   @override
   void initState() {
-
     _updateContacts();
     super.initState();
   }
@@ -73,16 +74,15 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
               ),
             );
             if(searchText.isNotEmpty) _getContactsByQuery(searchText);
-            print("RESULT:$searchText");
+            debugPrint("RESULT:$searchText");
             }, icon: SvgPicture.asset(AppIcons.search),),
           PopupMenuButton<int>(
             icon: SvgPicture.asset(AppIcons.more),
             onSelected: (int item) {
-              setState(() {
-                selectedMenu = item;
-              });
+              selectedMenu = item;
               if (selectedMenu == 1) {
-                LocalDatabase.deleteAll();
+                _showDialog();
+                // _updateContacts();
               } else {
                 _getContactsByAlp(selectedMenu == 2 ? "ASC" : "DESC");
               }
@@ -163,7 +163,21 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
             );
           }else if (rowData.hasData) {
             List<ContactModelSql> contacts = rowData.data!;
-            return ListView(
+            return contacts.isEmpty?SizedBox(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(AppIcons.box),
+                  const SizedBox(height: 15,),
+                  Text('You have no contacts yet',style: TextStyle(
+                    color: Colors.black.withOpacity(0.4),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),),
+                ],
+              ),
+            ):ListView(
               children: List.generate(
                 contacts.length,
                 (index) => ListTile(
@@ -179,11 +193,20 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
                     color: Color(0xFF8B8B8B),
                   ),),
                   trailing: IconButton(
-                    onPressed: () {},
+                    onPressed: () async{
+                      await FlutterPhoneDirectCaller.callNumber(contacts[index].phone);
+                    },
                     icon: SvgPicture.asset(AppIcons.phone),
                   ),
                   onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(name: contacts[index].name, phone: contacts[index].phone, id: contacts[index].id!,surName: contacts[index].surName,)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(
+                      contactModelSql: ContactModelSql(phone: contacts[index].phone, name: contacts[index].name, surName: contacts[index].surName,id: contacts[index].id!),
+                      deleteListener: () {_updateContacts();},
+                    ),),);
+                  },
+                  onLongPress: () {
+                    LocalDatabase.deleteContact(contacts[index].id!);
+                    _updateContacts();
                   },
                 ),
               ),
@@ -196,11 +219,39 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           setState(() {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const AddContactScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              _updateContacts();
+              return AddContactScreen(listener: () {_updateContacts();},);
+            }
+            ),
+            );
+            _updateContacts();
           });
         },
         child: Center(child: SvgPicture.asset(AppIcons.plus),),
       ),
     );
+  }
+  _showDialog(){
+    showDialog(context: context, builder: (context){
+      return  AlertDialog(
+        title: const Text('Delete all contacts'),
+        content: const Text('Are you sure you want to delete all your contacts?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'No'),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, 'Yes');
+              LocalDatabase.deleteAll();
+              _updateContacts();
+            },
+            child: const Text('Yes'),
+          ),
+        ],
+      );
+    });
   }
 }

@@ -115,6 +115,7 @@ class LocalDatabase {
     return allToDos;
   }
 
+  // ignore: body_might_complete_normally_nullable
   static Future<ContactModelSql?> getSingleContact(int id) async {
     List<ContactModelSql> contacts = [];
     final db = await getInstance.database;
@@ -130,13 +131,15 @@ class LocalDatabase {
       return contacts.first;
     }
   }
-  static Future<List<ContactModelSql>> getContactsByAlphabet(String order) async {
+  static Future<List<ContactModelSql>> getContactsByAlphabet(
+      String order) async {
     List<ContactModelSql> allToDos = [];
     final db = await getInstance.database;
     allToDos = (await db.query(ContactModelFields.contactsTable,
-        orderBy: "${ContactModelFields.name} $order"))
+        orderBy: "${ContactModelFields.name} $order",))
         .map((e) => ContactModelSql.fromJson(e))
         .toList();
+    // print('----------$allToDos-----------');
     return allToDos;
   }
 

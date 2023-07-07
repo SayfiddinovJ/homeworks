@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:homeworks/data/local/db/local_database.dart';
 import 'package:homeworks/models/contact_model/contact_model.dart';
-import 'package:homeworks/ui/contact/my_contacts_screen.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 import '../../utils/app_icons.dart';
 
 class AddContactScreen extends StatefulWidget {
-  const AddContactScreen({super.key});
-
+  const AddContactScreen({super.key, required this.listener});
+  final VoidCallback listener;
   @override
   State<AddContactScreen> createState() => _AddContactScreenState();
 }
 
 class _AddContactScreenState extends State<AddContactScreen> {
+  var maskFormatter = MaskTextInputFormatter(
+      mask: '(##) ### - ## - ##',
+      filter: {"#": RegExp(r'[0-9]')},
+      type: MaskAutoCompletionType.lazy);
   final TextEditingController _controllerName = TextEditingController();
   final TextEditingController _controllerSurName = TextEditingController();
   final TextEditingController _controllerPhoneNumber = TextEditingController();
+  final FocusNode nameFocusNode = FocusNode();
+  final FocusNode phoneFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,27 +31,53 @@ class _AddContactScreenState extends State<AddContactScreen> {
         elevation: 0.2,
         leading: IconButton(
           onPressed: (){setState(() {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const MyContactsScreen()));
+            Navigator.pop(context);
           });},
           icon: SvgPicture.asset(AppIcons.arrowBack),
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              if(_controllerName.text.isEmpty || _controllerPhoneNumber.text.isEmpty || _controllerSurName.text.isEmpty){
-                const snackBar = SnackBar(
-                  content: Text('Maydonlar to\'ldirilmadi'),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }else if(_controllerName.text.isNotEmpty && _controllerPhoneNumber.text.isNotEmpty && _controllerSurName.text.isNotEmpty){
-                LocalDatabase.insertContact(
-                  ContactModelSql(
-                      phone: _controllerPhoneNumber.text,
+            onPressed: () async {
+              if (_controllerName.text.isNotEmpty) {
+                if (_controllerPhoneNumber.text.length == 18) {
+                  String phone = _controllerPhoneNumber.text.replaceAll(" ", "");
+                  phone = phone.replaceAll("(", "");
+                  phone = phone.replaceAll(")", "");
+                  phone = phone.replaceAll("-", "");
+
+                  ContactModelSql newContact =
+                  await LocalDatabase.insertContact(
+                    ContactModelSql(
+                      phone: "+998$phone",
                       name: _controllerName.text,
-                      surName: _controllerSurName.text,
+                      surName: _controllerSurName.text.isEmpty ? '':_controllerSurName.text,
+                    ),
+                  );
+                  // ignore: use_build_context_synchronously
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Contact qo\'shildi!"),
+                    ),
+                  );
+                  if ((newContact.id != null) && (newContact.id! > 0)) {
+                    if (context.mounted) {
+                      widget.listener.call();
+                      Navigator.pop(context);
+                    }
+                  } else {}
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Telefon nomer to'liq emas!"),
+                    ),
+                  );
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Ism kiriting!"),
                   ),
                 );
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const MyContactsScreen()));
               }
             },
             icon: SvgPicture.asset(AppIcons.done),
@@ -119,6 +150,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
               height: 50,
               child: TextField(
                 controller: _controllerSurName,
+                focusNode: nameFocusNode,
                 decoration: InputDecoration(
                   hintText: 'Surname',
                   hintStyle: const TextStyle(
@@ -159,12 +191,24 @@ class _AddContactScreenState extends State<AddContactScreen> {
             const SizedBox(height: 5,),
             SizedBox(
               height: 50,
-              child: TextFormField(
+              child: TextField(
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 controller: _controllerPhoneNumber,
+                focusNode: phoneFocusNode,
+                inputFormatters: [maskFormatter],
+                onChanged: (number) {
+                  if (number.length == 18) {
+                    phoneFocusNode.unfocus();
+                  }
+                },
                 decoration: InputDecoration(
-                  hintText: '+998 __ ___ __ __',
+                  prefixIcon: Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                    child: const Text("+998",),
+                  ),
+                  hintText: ' _ _  _ _ _ _ _ ',
                   hintStyle: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,

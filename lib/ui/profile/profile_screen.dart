@@ -1,38 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:homeworks/data/local/db/local_database.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/contact_model/contact_model.dart';
 import '../../utils/app_icons.dart';
-import '../contact/my_contacts_screen.dart';
+import '../contact/widgets/search_view_screen.dart';
 
 // ignore: must_be_immutable
 class ProfileScreen extends StatefulWidget {
-  ProfileScreen({
+  const ProfileScreen({
     super.key,
-    required this.name,
-    required this.surName,
-    required this.phone,
-    required this.id,
+    required this.contactModelSql,
+    required this.deleteListener
   });
-  String name;
-  String surName;
-  int id;
-  String phone;
+  final ContactModelSql contactModelSql;
+  final VoidCallback deleteListener;
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
+
+  List<String> options = <String>[
+    'Default',
+    'A-Z',
+    'Z-A',
+  ];
+  String dropdownValue = 'Default';
+
+  String searchText = "";
+  int selectedMenu = 1;
+
   List<ContactModelSql> contacts = [];
+  List<ContactModelSql> allContacts = [];
+
   _updateContacts() async {
+    allContacts = await LocalDatabase.getAllContacts();
     contacts = await LocalDatabase.getAllContacts();
+    setState(() {widget.deleteListener.call();});
+  }
+
+  _getContactsByAlp(String order) async {
+    contacts = await LocalDatabase.getContactsByAlphabet(order);
+    setState(() {});
+  }
+
+  _getContactsByQuery(String query) async {
+    contacts = await LocalDatabase.getContactsByQuery(query);
     setState(() {});
   }
   bool isSearch=false;
   @override
   void initState() {
-
     _updateContacts();
     super.initState();
   }
@@ -49,20 +71,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.white,
         elevation: 0.2,
         actions: [
-          Visibility(
-            visible: isSearch==false,
-            child: IconButton(
-              onPressed: () {
-                setState(() {
-                  isSearch=true;
-                });
-              },
-              icon: SvgPicture.asset(AppIcons.search,),
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
+          IconButton(onPressed: () async {
+            searchText = await showSearch(
+              context: context,
+              delegate: ContactSearchView(
+                suggestionList: allContacts.map((e) => e.name).toList(),
+                surName: allContacts.map((e) => e.surName).toList(),
+                id: allContacts.map((e) => e.id).toList(),
+                phoneNumber: allContacts.map((e) => e.phone).toList(),
+              ),
+            );
+            if(searchText.isNotEmpty) _getContactsByQuery(searchText);
+            debugPrint("RESULT:$searchText");
+          }, icon: SvgPicture.asset(AppIcons.search),),
+          PopupMenuButton<int>(
             icon: SvgPicture.asset(AppIcons.more),
+            onSelected: (int item) {
+              setState(() {
+                selectedMenu = item;
+              });
+              if (selectedMenu == 1) {
+                _showDialog();
+                _updateContacts();
+              } else {
+                _getContactsByAlp(selectedMenu == 2 ? "ASC" : "DESC");
+              }
+            },
+            position: PopupMenuPosition.values.last,
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+              const PopupMenuItem<int>(
+                value: 1,
+                child: Text('Delete all'),
+              ),
+              const PopupMenuItem<int>(
+                value: 2,
+                child: Text('Sort by A-Z'),
+              ),
+              const PopupMenuItem<int>(
+                value: 3,
+                child: Text('Sort by Z-A'),
+              ),
+            ],
           ),
         ],
         title: isSearch ? Row(
@@ -95,10 +144,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
 
-
-
-
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
@@ -117,13 +162,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _showDialog();
                   }, icon: SvgPicture.asset(AppIcons.delete),),
                 IconButton(onPressed: (){
-                  _updateSingleContact(ContactModelSql(phone: widget.phone, name: widget.name, surName: widget.surName));
+                  _updateSingleContact(ContactModelSql(phone: widget.contactModelSql.phone, name: widget.contactModelSql.name, surName: widget.contactModelSql.surName),(){_updateContacts();});
                   _updateContacts();
                 }, icon: SvgPicture.asset(AppIcons.edit),),
               ],
             ),
             const SizedBox(height: 20,),
-            Text('${widget.name} ${widget.surName}',style: const TextStyle(
+            Text('${widget.contactModelSql.name} ${widget.contactModelSql.surName}',style: const TextStyle(
               color: Colors.black,
               fontSize: 22,
               fontWeight: FontWeight.w500,
@@ -131,30 +176,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 25,),
             Row(
               children: [
-                Text(widget.phone,style: const TextStyle(
+                Text(widget.contactModelSql.phone,style: const TextStyle(
                   color: Colors.black,
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
                 ),),
                 const Spacer(),
-                Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF08AE2D),
-                    borderRadius: BorderRadius.circular(40),
+                GestureDetector(
+                  onTap: ()async{
+                    await FlutterPhoneDirectCaller.callNumber(widget.contactModelSql.phone);
+                  },
+                  child: Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF08AE2D),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: Center(child: SvgPicture.asset(AppIcons.call),),
                   ),
-                  child: Center(child: SvgPicture.asset(AppIcons.call),),
                 ),
                 const SizedBox(width: 15,),
-                Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE9AD13),
-                    borderRadius: BorderRadius.circular(40),
+                GestureDetector(
+                  onTap: ()async{
+                    await launchUrl(Uri.parse("sms:${widget.contactModelSql.phone}?body="));
+                  },
+                  child: Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE9AD13),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: Center(child: SvgPicture.asset(AppIcons.message),),
                   ),
-                  child: Center(child: SvgPicture.asset(AppIcons.message),),
                 ),
               ],
             ),
@@ -163,20 +218,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
   _showDialog(){
     showDialog(context: context, builder: (context){
       return  AlertDialog(
         title: const Text('Delete contact'),
-        content: Text('Are you sure you want to remove ${widget.name} from your contacts?'),
+        content: Text('Are you sure you want to remove ${widget.contactModelSql.name} ${widget.contactModelSql.surName} from your contacts?'),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, 'No'),
             child: const Text('No'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const MyContactsScreen()));
-              LocalDatabase.deleteContact(widget.id);
+            onPressed: (){
+              Navigator.pop(context);
+              Navigator.of(context).pop();
+              LocalDatabase.deleteContact(widget.contactModelSql.id!);
+              widget.deleteListener.call();
             },
             child: const Text('Yes'),
           ),
@@ -184,7 +242,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     });
   }
-  _updateSingleContact(ContactModelSql contactModelSql) {
+
+
+  _updateSingleContact(ContactModelSql contactModelSql, VoidCallback deleteListener) {
     TextEditingController nameController =
     TextEditingController(text: contactModelSql.name);
     TextEditingController surNameController =
@@ -332,13 +392,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 20,),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () async {
-                        print(nameController.text);
-                        print(surNameController.text);
-                        print(phoneController.text);
-                        await LocalDatabase.updateContact(id: widget.id, name: nameController.text, surName: surNameController.text, phone: phoneController.text);
+                      onPressed: () {
+                        a()async{
+                          debugPrint(nameController.text);
+                          debugPrint(surNameController.text);
+                          debugPrint(phoneController.text);
+                          await LocalDatabase.updateContact(id: widget.contactModelSql.id!, name: nameController.text, surName: surNameController.text, phone: phoneController.text);
+                        }
+                        a();
                         Navigator.pop(context);
-                        _updateContacts();
+                        deleteListener.call();
                       },
                       child: const Text('Update'),
                     ),
