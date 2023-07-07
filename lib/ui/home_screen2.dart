@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:homeworks/data/network/api_repository.dart';
-import 'package:homeworks/models/currency_model.dart';
+import 'package:homeworks/models/card_model.dart';
 
 import '../data/network/api_provider.dart';
 
@@ -19,7 +19,7 @@ class _HomeScreen2State extends State<HomeScreen2> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Currencies Screen"),
+        title: const Text("Card Screen"),
       ),
       body: FutureBuilder<List<BankModel>>(
         future: currencyRepository.fetchCurrencies(),

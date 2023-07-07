@@ -1,5 +1,5 @@
 
-import '../../models/currency_model.dart';
+import '../../models/card_model.dart';
 import '../../models/universal_response.dart';
 import 'api_provider.dart';
 

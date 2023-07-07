@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:homeworks/data/network/api_repository.dart';
-import 'package:homeworks/models/currency_model.dart';
+import 'package:homeworks/models/card_model.dart';
 
 import '../data/network/api_provider.dart';
 class HomeScreen1 extends StatefulWidget {
