@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../models/card_model.dart';
+import '../../models/card/card_model.dart';
 import '../../models/universal_response.dart';
 
 class ApiProvider {

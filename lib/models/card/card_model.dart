@@ -1,3 +1,5 @@
+import 'package:homeworks/models/color/color_model.dart';
+
 class BankModel {
   final int id;
   final String cardType;
@@ -35,19 +37,7 @@ class BankModel {
     );
   }
 }
-class ColorsModel{
-  final String colorA;
-  final String colorB;
-  ColorsModel({
-   required this.colorA,
-   required this.colorB,
-  });
-  factory ColorsModel.fromJson(Map<String,dynamic> json){
-    return ColorsModel(
-      colorA: json['color_a'] as String? ?? '',
-      colorB: json['color_b'] as String? ?? '');
-  }
-}
+
 
 // {
 //  "id":1,

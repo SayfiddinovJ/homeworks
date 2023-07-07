@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:homeworks/data/network/api_repository.dart';
-import 'package:homeworks/models/card_model.dart';
+import 'package:homeworks/models/card/card_model.dart';
 
-import '../data/network/api_provider.dart';
+import '../../data/network/api_provider.dart';
 
 class HomeScreen2 extends StatefulWidget {
   const HomeScreen2({Key? key}) : super(key: key);
@@ -22,7 +22,7 @@ class _HomeScreen2State extends State<HomeScreen2> {
         title: const Text("Card Screen"),
       ),
       body: FutureBuilder<List<BankModel>>(
-        future: currencyRepository.fetchCurrencies(),
+        future: currencyRepository.fetchCardsForHome(),
         builder: (
             BuildContext context,
             AsyncSnapshot<List<BankModel>> snapshot,
