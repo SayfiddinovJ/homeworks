@@ -28,7 +28,7 @@ class _HomeScreen1State extends State<HomeScreen1> {
     });
 
     cards = await currencyRepository.fetchCardsForHome();
-    print("CURRENCY FETCH FINISHED:${cards.length}");
+    debugPrint("CURRENCY FETCH FINISHED:${cards.length}");
     setState(() {
       isLoading = false;
     });

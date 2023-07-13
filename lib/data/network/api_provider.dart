@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/card/card_model.dart';
@@ -22,7 +23,7 @@ class ApiProvider {
       return UniversalResponse(error: "ERROR");
 
     } catch (error) {
-      print("ERRROR$error");
+      debugPrint("ERROR$error");
       return UniversalResponse(error: error.toString());
     }
   }
