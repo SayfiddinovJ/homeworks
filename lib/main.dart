@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:homeworks/ui/home_screen.dart';
-
-void main(){
+import 'package:homeworks/data/local/storage_repository.dart';
+import 'package:homeworks/ui/home/home_screen.dart';
+late StorageRepository storageRepository;
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  storageRepository = await StorageRepository.getInstance();
+
   runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
@@ -21,7 +25,7 @@ class MyApp extends StatelessWidget {
             home: child,
       );
     },
-      child: HomeScreen(),
+      child: const HomeScreen(),
     );
   }
 }
