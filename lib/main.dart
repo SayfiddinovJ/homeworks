@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:homeworks/providers/calculator_provider.dart';
+import 'package:homeworks/data/network/api_provider.dart';
+import 'package:homeworks/data/network/user_repository.dart';
+import 'package:homeworks/providers/user_provider.dart';
 import 'package:homeworks/providers/number_provider.dart';
 import 'package:homeworks/ui/home_screen.dart';
 import 'package:provider/provider.dart';
@@ -12,9 +14,12 @@ void main() {
         lazy: true,
       ),
       ChangeNotifierProvider(
-        create: (context) => CalculatorProvider(result: 0),
-        lazy: true,
-      ),
+        create: (context) => UserProvider(
+          userRepository: UserRepository(
+            apiProvider: ApiProvider(),
+          ),
+        ),
+      )
     ],
     child: const MyApp(),
   ));
