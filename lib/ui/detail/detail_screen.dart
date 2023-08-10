@@ -83,7 +83,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         ),
                       )
                     ],
-                    options: CarouselOptions(),
+                    options: CarouselOptions(autoPlay: true),
                   ),
                 ),
                 const SizedBox(

@@ -54,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
+              physics: const BouncingScrollPhysics(),
               children: [
                 ...List.generate(
                   mainCountryModel.dataModel.countryModel.length,
@@ -70,7 +71,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      title: Text(countryModel.name),
+                      leading: Text(
+                        countryModel.emoji,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      title: Text(
+                        countryModel.name,
+                        style: const TextStyle(fontSize: 20),
+                      ),
                     );
                   },
                 ),

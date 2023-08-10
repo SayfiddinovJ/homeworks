@@ -17,16 +17,30 @@ class CountryDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Country code: ${countryModel.code}',
-              style: const TextStyle(fontSize: 20),),
-            Text('Capital: ${countryModel.capital}',
-              style: const TextStyle(fontSize: 20),),
-            Text('Continent: ${countryModel.continent.name}',
-              style: const TextStyle(fontSize: 20),),
-            Text('Currency: ${countryModel.currency}',
-              style: const TextStyle(fontSize: 20),),
-            Text('Phone: ${countryModel.phone}',
-              style: const TextStyle(fontSize: 20),),
+            Text(
+              countryModel.emoji,
+              style: const TextStyle(fontSize: 50),
+            ),
+            Text(
+              'Country code: ${countryModel.code}',
+              style: const TextStyle(fontSize: 20),
+            ),
+            Text(
+              'Capital: ${countryModel.capital}',
+              style: const TextStyle(fontSize: 20),
+            ),
+            Text(
+              'Continent: ${countryModel.continent.name}',
+              style: const TextStyle(fontSize: 20),
+            ),
+            Text(
+              'Currency: ${countryModel.currency}',
+              style: const TextStyle(fontSize: 20),
+            ),
+            Text(
+              'Phone: ${countryModel.phone}',
+              style: const TextStyle(fontSize: 20),
+            ),
           ],
         ),
       ),
