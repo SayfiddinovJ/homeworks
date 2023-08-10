@@ -3,6 +3,7 @@ import 'package:homeworks/data/models/dynamic_view_model.dart';
 import 'package:homeworks/data/models/main_model.dart';
 import 'package:homeworks/data/models/universal_data.dart';
 import 'package:homeworks/provider/api_provider.dart';
+import 'package:homeworks/utils/helper.dart';
 
 class DynamicViewScreen extends StatefulWidget {
   const DynamicViewScreen({Key? key}) : super(key: key);
@@ -12,6 +13,8 @@ class DynamicViewScreen extends StatefulWidget {
 }
 
 class _DynamicViewScreenState extends State<DynamicViewScreen> {
+  List<DynamicViewModel> common = [];
+  List<DynamicViewModel> grouped = [];
   late MainModel mainModel;
   bool isLoading = true;
 
@@ -47,63 +50,62 @@ class _DynamicViewScreenState extends State<DynamicViewScreen> {
               child: CircularProgressIndicator(),
             )
           : ListView(
+              padding: const EdgeInsets.all(15),
               children: [
-                ...List.generate(
-                  mainModel.dynamicView.length,
-                  (index) => getType(mainModel.dynamicView[index]),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    children: [
+                      ...List.generate(
+                          common.length, (index) => getWidget(common[index]))
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    children: [
+                      ...List.generate(
+                          grouped.length, (index) => getWidget(grouped[index]))
+                    ],
+                  ),
                 ),
               ],
             ),
     );
   }
 
-  Widget getType(DynamicViewModel dynamicViewModel) {
-    int color = int.parse('0x${dynamicViewModel.color.replaceAll('#', '')}');
-    switch (dynamicViewModel.type) {
-      case 'container':
-        return Container(
-          height: dynamicViewModel.height.toDouble(),
-          width: dynamicViewModel.width.toDouble(),
-          color: Color(color),
-          child: Center(
-            child: Text(dynamicViewModel.title),
+  Widget getWidget(DynamicViewModel dynamicViewModel) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      height: dynamicViewModel.height.toDouble(),
+      width: dynamicViewModel.width.toDouble(),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Helper.hexToColor(dynamicViewModel.color),
+      ),
+      child: Center(
+        child: Text(
+          '${dynamicViewModel.title} ${dynamicViewModel.type}',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
           ),
-        );
-      case 'column':
-        return Column(
-          children: [
-            Text(
-              dynamicViewModel.title,
-              style: TextStyle(
-                color: Color(color),
-              ),
-            ),
-          ],
-        );
-      case 'row':
-        return Row(
-          children: [
-            Text(
-              dynamicViewModel.title,
-              style: TextStyle(
-                color: Color(color),
-              ),
-            ),
-          ],
-        );
-      case 'sizedbox':
-        return SizedBox(
-          height: dynamicViewModel.height.toDouble(),
-          width: dynamicViewModel.width.toDouble(),
-          child: Text(
-            dynamicViewModel.title,
-            style: TextStyle(
-              color: Color(color),
-            ),
-          ),
-        );
-      default:
-        return const Text('None');
-    }
+        ),
+      ),
+    );
   }
 }
