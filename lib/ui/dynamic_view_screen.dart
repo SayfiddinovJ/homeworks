@@ -27,6 +27,14 @@ class _DynamicViewScreenState extends State<DynamicViewScreen> {
 
     if (results[0].error.isEmpty) {
       mainModel = results[0].data as MainModel;
+      for (var element in mainModel.dynamicView) {
+        debugPrint(element.group);
+        if (element.group == 'COMMON') {
+          common.add(element);
+        } else if (element.group == 'GROUPED') {
+          grouped.add(element);
+        }
+      }
     }
     setState(() {
       isLoading = false;
@@ -56,12 +64,13 @@ class _DynamicViewScreenState extends State<DynamicViewScreen> {
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.black,
-                      width: 1,
+                      width: 2,
                     ),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Column(
                     children: [
+                      const Padding(padding: EdgeInsets.symmetric(vertical: 5),child: Text('COMMON',style: TextStyle(fontSize: 20),),),
                       ...List.generate(
                           common.length, (index) => getWidget(common[index]))
                     ],
@@ -72,12 +81,13 @@ class _DynamicViewScreenState extends State<DynamicViewScreen> {
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.black,
-                      width: 1,
+                      width: 2,
                     ),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Column(
                     children: [
+                      const Padding(padding: EdgeInsets.symmetric(vertical: 5),child: Text('GROUPED',style: TextStyle(fontSize: 20),),),
                       ...List.generate(
                           grouped.length, (index) => getWidget(grouped[index]))
                     ],
