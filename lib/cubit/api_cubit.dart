@@ -1,12 +1,11 @@
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:homeworks/cubit/api_state.dart';
 import 'package:homeworks/data/models/universal_data.dart';
 import 'package:homeworks/data/models/user_model.dart';
 import 'package:homeworks/data/repository/api_repository.dart';
 
-class ApiCubit extends Cubit<ApiState>{
-  ApiCubit({required this.apiRepository}) : super(ApiInitial()){
+class ApiCubit extends Cubit<ApiState> {
+  ApiCubit({required this.apiRepository}) : super(ApiInitial()) {
     getUser();
   }
 
@@ -25,4 +24,3 @@ class ApiCubit extends Cubit<ApiState>{
     }
   }
 }
-
