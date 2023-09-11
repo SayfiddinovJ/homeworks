@@ -1,13 +1,30 @@
-import 'package:flutter/cupertino.dart';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:homeworks/bloc/graph_event.dart';
+import 'package:homeworks/bloc/graph_state.dart';
+import 'package:homeworks/data/graphql/api_client.dart';
 
-part 'graph_event.dart';
-part 'graph_state.dart';
+class ShipsBloc extends Bloc<ShipsEvent, ShipsState> {
+  ShipsBloc({required ShipsApiClient jobsApiClient})
+      : _jobsApiClient = jobsApiClient,
+        super(ShipsLoadingState()) {
+    on<ShipsFetchStarted>(_onCountriesFetchStarted);
+  }
 
-class GraphBloc extends Bloc<GraphEvent, GraphState> {
-  GraphBloc() : super(GraphInitial()) {
-    on<GraphEvent>((event, emit) {
-      // TODO: implement event handler
-    });
+  final ShipsApiClient _jobsApiClient;
+
+  Future<void> _onCountriesFetchStarted(
+      ShipsFetchStarted event,
+      Emitter<ShipsState> emit,
+      ) async {
+    emit(ShipsLoadingState());
+    try {
+      final countries = await _jobsApiClient.getCountries();
+      emit(ShipsLoadingSuccess(countries));
+    } catch (error) {
+      debugPrint("ERROR:$error");
+      emit(ShipsLoadingFailure());
+    }
   }
 }

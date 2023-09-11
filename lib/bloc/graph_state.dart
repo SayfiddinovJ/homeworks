@@ -1,6 +1,13 @@
-part of 'graph_bloc.dart';
+import 'package:homeworks/data/graphql/api_service.dart';
 
-@immutable
-abstract class GraphState {}
+abstract class ShipsState {}
 
-class GraphInitial extends GraphState {}
+class ShipsLoadingState extends ShipsState {}
+
+class ShipsLoadingSuccess extends ShipsState {
+  ShipsLoadingSuccess(this.ships);
+
+  final List<ShipsModel> ships;
+}
+
+class ShipsLoadingFailure extends ShipsState {}

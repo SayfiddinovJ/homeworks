@@ -1,4 +1,3 @@
-part of 'graph_bloc.dart';
+abstract class ShipsEvent {}
 
-@immutable
-abstract class GraphEvent {}
+class ShipsFetchStarted extends ShipsEvent {}
