@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:homeworks/data/getx/dictionary.dart';
 import 'package:homeworks/data/model/dictionary_model.dart';
 import 'package:homeworks/data/network/api_service.dart';
+import 'package:homeworks/ui/word_detail_screen.dart';
 
 class DictionaryScreen extends StatelessWidget {
   const DictionaryScreen({super.key});
@@ -41,12 +42,26 @@ class DictionaryScreen extends StatelessWidget {
                                 DictionaryModel dictionary =
                                     dictionaryController.words[index];
                                 return ListTile(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => WordDetailScreen(
+                                          title: dictionary.word,
+                                          phonetic: dictionary.phonetic,
+                                          definition: dictionary.meaning.first,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                   title: Text(dictionary.word),
                                   subtitle: Text(dictionary.phonetic),
                                   trailing: IconButton(
                                     onPressed: () {
-                                      player.play(UrlSource(
-                                          dictionary.phonetics[index].audio));
+                                      player.play(
+                                        UrlSource(
+                                            dictionary.phonetics[index].audio),
+                                      );
                                     },
                                     icon: const Icon(Icons.volume_up),
                                   ),
