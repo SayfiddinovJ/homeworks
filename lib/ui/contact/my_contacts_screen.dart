@@ -17,7 +17,6 @@ class MyContactsScreen extends StatefulWidget {
 }
 
 class _MyContactsScreenState extends State<MyContactsScreen> {
-
   List<String> options = <String>[
     'Default',
     'A-Z',
@@ -48,7 +47,9 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
     contacts = await LocalDatabase.getContactsByQuery(query);
     setState(() {});
   }
-  bool isSearch=false;
+
+  bool isSearch = false;
+
   @override
   void initState() {
     _updateContacts();
@@ -63,19 +64,22 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
         backgroundColor: Colors.white,
         elevation: 0.2,
         actions: [
-          IconButton(onPressed: () async {
-            searchText = await showSearch(
-              context: context,
-              delegate: ContactSearchView(
-                suggestionList: allContacts.map((e) => e.name).toList(),
-                surName: allContacts.map((e) => e.surName).toList(),
-                id: allContacts.map((e) => e.id).toList(),
-                phoneNumber: allContacts.map((e) => e.phone).toList(),
-              ),
-            );
-            if(searchText.isNotEmpty) _getContactsByQuery(searchText);
-            debugPrint("RESULT:$searchText");
-            }, icon: SvgPicture.asset(AppIcons.search),),
+          IconButton(
+            onPressed: () async {
+              searchText = await showSearch(
+                context: context,
+                delegate: ContactSearchView(
+                  suggestionList: allContacts.map((e) => e.name).toList(),
+                  surName: allContacts.map((e) => e.surName).toList(),
+                  id: allContacts.map((e) => e.id).toList(),
+                  phoneNumber: allContacts.map((e) => e.phone).toList(),
+                ),
+              );
+              if (searchText.isNotEmpty) _getContactsByQuery(searchText);
+              debugPrint("RESULT:$searchText");
+            },
+            icon: SvgPicture.asset(AppIcons.search),
+          ),
           PopupMenuButton<int>(
             icon: SvgPicture.asset(AppIcons.more),
             onSelected: (int item) {
@@ -104,37 +108,41 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
             ],
           ),
         ],
-        title: isSearch ? Row(
-          children: [
-            IconButton(
-              onPressed: (){setState(() {
-                isSearch=false;
-              });},
-              icon: SvgPicture.asset(AppIcons.arrowBackIos),
-            ),
-            Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  hintStyle: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black.withOpacity(0.5),
+        title: isSearch
+            ? Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isSearch = false;
+                      });
+                    },
+                    icon: SvgPicture.asset(AppIcons.arrowBackIos),
                   ),
-                  border: InputBorder.none,
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        hintStyle: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : const Text(
+                "Contacts",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
                 ),
               ),
-            ),
-          ],
-        ) : const Text("Contacts",style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-          ),
-        ),
       ),
-
-
       body: FutureBuilder<List<ContactModelSql>>(
         future: LocalDatabase.getAllContacts(),
         builder: (
@@ -145,113 +153,153 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
             return const Center(
               child: CircularProgressIndicator(),
             );
-          }else if(rowData.hasData==false){
+          } else if (rowData.hasData == false) {
             return SizedBox(
               width: double.infinity,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SvgPicture.asset(AppIcons.box),
-                  const SizedBox(height: 15,),
-                  Text('You have no contacts yet',style: TextStyle(
-                    color: Colors.black.withOpacity(0.4),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),),
-                ],
-              ),
-            );
-          }else if (rowData.hasData) {
-            List<ContactModelSql> contacts = rowData.data!;
-            return contacts.isEmpty?SizedBox(
-              width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(AppIcons.box),
-                  const SizedBox(height: 15,),
-                  Text('You have no contacts yet',style: TextStyle(
-                    color: Colors.black.withOpacity(0.4),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),),
-                ],
-              ),
-            ):ListView(
-              children: List.generate(
-                contacts.length,
-                (index) => ListTile(
-                  leading: SvgPicture.asset(AppIcons.accountLogo),
-                  title: Text('${contacts[index].name} ${contacts[index].surName}',style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),),
-                  subtitle: Text(contacts[index].phone,style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF8B8B8B),
-                  ),),
-                  trailing: IconButton(
-                    onPressed: () async{
-                      await FlutterPhoneDirectCaller.callNumber(contacts[index].phone);
-                    },
-                    icon: SvgPicture.asset(AppIcons.phone),
+                  const SizedBox(
+                    height: 15,
                   ),
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(
-                      contactModelSql: ContactModelSql(phone: contacts[index].phone, name: contacts[index].name, surName: contacts[index].surName,id: contacts[index].id!),
-                      deleteListener: () {_updateContacts();},
-                    ),),);
-                  },
-                  onLongPress: () {
-                    LocalDatabase.deleteContact(contacts[index].id!);
-                    _updateContacts();
-                  },
-                ),
+                  Text(
+                    'You have no contacts yet',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.4),
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
             );
+          } else if (rowData.hasData) {
+            List<ContactModelSql> contacts = rowData.data!;
+            return contacts.isEmpty
+                ? SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(AppIcons.box),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        Text(
+                          'You have no contacts yet',
+                          style: TextStyle(
+                            color: Colors.black.withOpacity(0.4),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView(
+                    children: List.generate(
+                      contacts.length,
+                      (index) => ListTile(
+                        leading: SvgPicture.asset(AppIcons.accountLogo),
+                        title: Text(
+                          '${contacts[index].name} ${contacts[index].surName}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                        subtitle: Text(
+                          contacts[index].phone,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF8B8B8B),
+                          ),
+                        ),
+                        trailing: IconButton(
+                          onPressed: () async {
+                            await FlutterPhoneDirectCaller.callNumber(
+                                contacts[index].phone);
+                          },
+                          icon: SvgPicture.asset(AppIcons.phone),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileScreen(
+                                contactModelSql: ContactModelSql(
+                                    phone: contacts[index].phone,
+                                    name: contacts[index].name,
+                                    surName: contacts[index].surName,
+                                    id: contacts[index].id!),
+                                deleteListener: () {
+                                  _updateContacts();
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        onLongPress: () {
+                          LocalDatabase.deleteContact(contacts[index].id!);
+                          _updateContacts();
+                        },
+                      ),
+                    ),
+                  );
           }
           return Center(child: Text(rowData.error.toString()));
         },
       ),
-
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
+        onPressed: () {
           setState(() {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              _updateContacts();
-              return AddContactScreen(listener: () {_updateContacts();},);
-            }
-            ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                _updateContacts();
+                return AddContactScreen(
+                  listener: () {
+                    _updateContacts();
+                  },
+                );
+              }),
             );
             _updateContacts();
           });
         },
-        child: Center(child: SvgPicture.asset(AppIcons.plus),),
+        child: Center(
+          child: SvgPicture.asset(AppIcons.plus),
+        ),
       ),
     );
   }
-  _showDialog(){
-    showDialog(context: context, builder: (context){
-      return  AlertDialog(
-        title: const Text('Delete all contacts'),
-        content: const Text('Are you sure you want to delete all your contacts?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'No'),
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, 'Yes');
-              LocalDatabase.deleteAll();
-              _updateContacts();
-            },
-            child: const Text('Yes'),
-          ),
-        ],
-      );
-    });
+
+  _showDialog() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Delete all contacts'),
+            content: const Text(
+                'Are you sure you want to delete all your contacts?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'No'),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context, 'Yes');
+                  LocalDatabase.deleteAll();
+                  _updateContacts();
+                },
+                child: const Text('Yes'),
+              ),
+            ],
+          );
+        });
   }
 }
