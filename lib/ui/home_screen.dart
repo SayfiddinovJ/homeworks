@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ContactModel contact = widget.contacts[index];
               return Dismissible(
                 key: Key(contact.name),
-                onDismissed: (direction) {
+                onDismissed: (dismissDirection) {
                   setState(() {
                     widget.contacts.removeAt(index);
                   });
